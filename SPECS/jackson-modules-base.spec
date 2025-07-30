@@ -1,8 +1,8 @@
 %bcond_with     jp_minimal
 
 Name:           jackson-modules-base
-Version:        2.14.1
-Release:        2%{?dist}
+Version:        2.19.1
+Release:        1%{?dist}
 Summary:        Jackson modules: Base
 License:        Apache-2.0
 
@@ -18,13 +18,16 @@ BuildRequires:  mvn(com.fasterxml.jackson.core:jackson-databind) >= %{version}
 BuildRequires:  mvn(com.fasterxml.jackson:jackson-base:pom:) >= %{version}
 BuildRequires:  mvn(com.google.code.maven-replacer-plugin:replacer)
 BuildRequires:  mvn(jakarta.activation:jakarta.activation-api)
-BuildRequires:  mvn(javax.xml.bind:jaxb-api)
-BuildRequires:  mvn(junit:junit)
+BuildRequires:  mvn(jakarta.xml.bind:jakarta.xml.bind-api)
+BuildRequires:  mvn(org.junit.jupiter:junit-jupiter)
 BuildRequires:  mvn(org.apache.felix:maven-bundle-plugin)
 BuildRequires:  mvn(org.mockito:mockito-all)
 BuildRequires:  mvn(org.ow2.asm:asm)
 
 BuildArch:      noarch
+%if 0%{?fedora} || 0%{?rhel} >= 10
+ExclusiveArch:  %{java_arches} noarch
+%endif
 
 %description
 Jackson "base" modules: modules that build directly on databind,
@@ -54,10 +57,9 @@ framework to read and write XML.
 
 %prep
 %setup -q -n %{name}-%{name}-%{version}
-%patch1 -p1
+%patch -P1 -p1
 
 %pom_remove_dep -r org.glassfish.jaxb:jaxb-runtime
-%pom_remove_plugin "de.jjohannes:gradle-module-metadata-maven-plugin"
 
 # no need for Java 9 module stuff
 %pom_remove_plugin -r :moditect-maven-plugin
@@ -67,7 +69,6 @@ framework to read and write XML.
 
 # Disable bundling of asm
 %pom_remove_plugin ":maven-shade-plugin" afterburner mrbean paranamer
-%pom_xpath_remove "pom:properties/pom:osgi.private" mrbean paranamer
 
 sed -i 's/\r//' mrbean/src/main/resources/META-INF/{LICENSE,NOTICE}
 cp -p mrbean/src/main/resources/META-INF/{LICENSE,NOTICE} .
@@ -78,8 +79,10 @@ cp -p mrbean/src/main/resources/META-INF/{LICENSE,NOTICE} .
 # NoClassDefFoundError: net/sf/cglib/core/CodeGenerationException
 %pom_add_dep cglib:cglib:3.2.4:test guice
 
-%pom_disable_module afterburner
+%pom_disable_module afterburner	
+%pom_disable_module android-record
 %pom_disable_module guice
+%pom_disable_module guice7
 %pom_disable_module mrbean
 %pom_disable_module osgi
 %pom_disable_module paranamer
@@ -87,6 +90,7 @@ cp -p mrbean/src/main/resources/META-INF/{LICENSE,NOTICE} .
 %pom_disable_module blackbird
 %pom_disable_module no-ctor-deser
 
+%pom_remove_plugin "org.gradlex:gradle-module-metadata-maven-plugin" jaxb
 # Allow javax,activation to be optional
 %pom_add_plugin "org.apache.felix:maven-bundle-plugin" jaxb "
 <configuration>
@@ -94,6 +98,12 @@ cp -p mrbean/src/main/resources/META-INF/{LICENSE,NOTICE} .
     <Import-Package>javax.activation;resolution:=optional,*</Import-Package>
   </instructions>
 </configuration>"
+
+
+# Revert jaxb annotation dependency to 2.17 mode
+%pom_remove_dep javax.xml.bind:jaxb-api jaxb
+%pom_add_dep jakarta.xml.bind:jakarta.xml.bind-api jaxb
+
 
 # This test fails since mockito was upgraded to 2.x
 rm osgi/src/test/java/com/fasterxml/jackson/module/osgi/InjectOsgiServiceTest.java
@@ -115,6 +125,10 @@ rm osgi/src/test/java/com/fasterxml/jackson/module/osgi/InjectOsgiServiceTest.ja
 %license LICENSE NOTICE
 
 %changelog
+* Thu Jul 17 2025 Red Hat PKI Team <rhcs-maint@redhat.com> - 2.19.1-1
+- Update to version 2.19.1
+- Resolves: RHEL-100245
+
 * Wed Nov 23 2022 Chris Kelley <ckelley@redhat.com> - 2.14.1-1
 - Update to version 2.14.1
 - Resolves: #2070122
