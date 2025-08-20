@@ -1,13 +1,14 @@
 %bcond_with     jp_minimal
 
 Name:           jackson-modules-base
-Version:        2.14.2
-Release:        2%{?dist}
+Version:        2.19.1
+Release:        1%{?dist}
 Summary:        Jackson modules: Base
 License:        Apache-2.0
 
 URL:            https://github.com/FasterXML/jackson-modules-base
 Source0:        %{url}/archive/%{name}-%{version}.tar.gz
+Patch1:         0001-Expose-javax.security.auth-from-JDK-internals.patch
 
 BuildRequires:  maven-local
 BuildRequires:  mvn(cglib:cglib)
@@ -16,9 +17,8 @@ BuildRequires:  mvn(com.fasterxml.jackson.core:jackson-core) >= %{version}
 BuildRequires:  mvn(com.fasterxml.jackson.core:jackson-databind) >= %{version}
 BuildRequires:  mvn(com.fasterxml.jackson:jackson-base:pom:) >= %{version}
 BuildRequires:  mvn(com.google.code.maven-replacer-plugin:replacer)
-BuildRequires:  mvn(jakarta.activation:jakarta.activation-api:2)
-BuildRequires:  mvn(jakarta.xml.bind:jakarta.xml.bind-api:4)
-BuildRequires:  mvn(junit:junit)
+BuildRequires:  mvn(jakarta.activation:jakarta.activation-api)
+BuildRequires:  mvn(javax.xml.bind:jaxb-api)
 BuildRequires:  mvn(org.apache.felix:maven-bundle-plugin)
 BuildRequires:  mvn(org.mockito:mockito-all)
 BuildRequires:  mvn(org.ow2.asm:asm)
@@ -43,19 +43,15 @@ framework to read and write XML.
 
 %prep
 %setup -q -n %{name}-%{name}-%{version}
+%patch -P1 -p1
 
-%pom_change_dep jakarta.activation:jakarta.activation-api jakarta.activation:jakarta.activation-api:2 jaxb
-%pom_change_dep jakarta.xml.bind:jakarta.xml.bind-api jakarta.xml.bind:jakarta.xml.bind-api:4 jaxb
-
-%pom_remove_dep -r org.glassfish.jaxb:jaxb-runtime
-%pom_remove_plugin "de.jjohannes:gradle-module-metadata-maven-plugin"
+%pom_change_dep -r jakarta.activation:jakarta.activation-api:1.2.2 jakarta.activation:jakarta.activation-api:1.2.1
 
 # no need for Java 9 module stuff
 %pom_remove_plugin -r :moditect-maven-plugin
 
 # Disable bundling of asm
 %pom_remove_plugin ":maven-shade-plugin" afterburner mrbean paranamer
-%pom_xpath_remove "pom:properties/pom:osgi.private" mrbean paranamer
 
 sed -i 's/\r//' mrbean/src/main/resources/META-INF/{LICENSE,NOTICE}
 cp -p mrbean/src/main/resources/META-INF/{LICENSE,NOTICE} .
@@ -67,13 +63,17 @@ cp -p mrbean/src/main/resources/META-INF/{LICENSE,NOTICE} .
 %pom_add_dep cglib:cglib:3.2.4:test guice
 
 %pom_disable_module afterburner
+%pom_disable_module android-record
 %pom_disable_module guice
+%pom_disable_module guice7
 %pom_disable_module mrbean
 %pom_disable_module osgi
 %pom_disable_module paranamer
 %pom_disable_module jakarta-xmlbind
 %pom_disable_module blackbird
 %pom_disable_module no-ctor-deser
+
+%pom_remove_plugin "org.gradlex:gradle-module-metadata-maven-plugin" jaxb
 
 # Allow javax,activation to be optional
 %pom_add_plugin "org.apache.felix:maven-bundle-plugin" jaxb "
@@ -103,6 +103,10 @@ rm osgi/src/test/java/com/fasterxml/jackson/module/osgi/InjectOsgiServiceTest.ja
 %license LICENSE NOTICE
 
 %changelog
+* Thu Jul 31 2025 Red Hat PKI Team <rhcs-maint@redhat.com> - 2.19.1-2
+- Update to version 2.19.1
+- Resolves: RHEL-103106
+
 * Thu Dec 07 2023 Red Hat PKI Team <rhcs-maint@redhat.com> - 2.14.2-2
 - Remove patch for java 11
 
