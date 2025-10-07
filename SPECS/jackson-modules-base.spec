@@ -2,7 +2,7 @@
 
 Name:           jackson-modules-base
 Version:        2.19.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Jackson modules: Base
 License:        Apache-2.0
 
@@ -17,7 +17,6 @@ BuildRequires:  mvn(com.fasterxml.jackson.core:jackson-core) >= %{version}
 BuildRequires:  mvn(com.fasterxml.jackson.core:jackson-databind) >= %{version}
 BuildRequires:  mvn(com.fasterxml.jackson:jackson-base:pom:) >= %{version}
 BuildRequires:  mvn(com.google.code.maven-replacer-plugin:replacer)
-BuildRequires:  mvn(jakarta.activation:jakarta.activation-api)
 BuildRequires:  mvn(javax.xml.bind:jaxb-api)
 BuildRequires:  mvn(org.apache.felix:maven-bundle-plugin)
 BuildRequires:  mvn(org.mockito:mockito-all)
@@ -44,8 +43,6 @@ framework to read and write XML.
 %prep
 %setup -q -n %{name}-%{name}-%{version}
 %patch -P1 -p1
-
-%pom_change_dep -r jakarta.activation:jakarta.activation-api:1.2.2 jakarta.activation:jakarta.activation-api:1.2.1
 
 # no need for Java 9 module stuff
 %pom_remove_plugin -r :moditect-maven-plugin
@@ -75,13 +72,7 @@ cp -p mrbean/src/main/resources/META-INF/{LICENSE,NOTICE} .
 
 %pom_remove_plugin "org.gradlex:gradle-module-metadata-maven-plugin" jaxb
 
-# Allow javax,activation to be optional
-%pom_add_plugin "org.apache.felix:maven-bundle-plugin" jaxb "
-<configuration>
-  <instructions>
-    <Import-Package>javax.activation;resolution:=optional,*</Import-Package>
-  </instructions>
-</configuration>"
+%pom_remove_dep jakarta.activation:jakarta.activation-api jaxb
 
 # This test fails since mockito was upgraded to 2.x
 rm osgi/src/test/java/com/fasterxml/jackson/module/osgi/InjectOsgiServiceTest.java
@@ -103,7 +94,11 @@ rm osgi/src/test/java/com/fasterxml/jackson/module/osgi/InjectOsgiServiceTest.ja
 %license LICENSE NOTICE
 
 %changelog
-* Thu Jul 31 2025 Red Hat PKI Team <rhcs-maint@redhat.com> - 2.19.1-2
+* Fri Sep 05 2025 Red Hat PKI Team <rhcs-maint@redhat.com> - 2.19.1-2
+- Remove dependency from jakarta activitaion 
+- Resolves: RHEL-113006
+
+* Thu Jul 31 2025 Red Hat PKI Team <rhcs-maint@redhat.com> - 2.19.1-1
 - Update to version 2.19.1
 - Resolves: RHEL-103106
 
