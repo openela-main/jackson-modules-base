@@ -1,7 +1,7 @@
 %bcond_with     jp_minimal
 
 Name:           jackson-modules-base
-Version:        2.19.1
+Version:        2.21.4
 Release:        2%{?dist}
 Summary:        Jackson modules: Base
 License:        Apache-2.0
@@ -12,7 +12,8 @@ Patch1:         0001-Expose-javax.security.auth-from-JDK-internals.patch
 
 BuildRequires:  maven-local
 BuildRequires:  mvn(cglib:cglib)
-BuildRequires:  mvn(com.fasterxml.jackson.core:jackson-annotations) >= %{version}
+#BuildRequires:  mvn(com.fasterxml.jackson.core:jackson-annotations) >= %{version}
+BuildRequires:  mvn(com.fasterxml.jackson.core:jackson-annotations) >= 2.21
 BuildRequires:  mvn(com.fasterxml.jackson.core:jackson-core) >= %{version}
 BuildRequires:  mvn(com.fasterxml.jackson.core:jackson-databind) >= %{version}
 BuildRequires:  mvn(com.fasterxml.jackson:jackson-base:pom:) >= %{version}
@@ -68,9 +69,11 @@ cp -p mrbean/src/main/resources/META-INF/{LICENSE,NOTICE} .
 %pom_disable_module paranamer
 %pom_disable_module jakarta-xmlbind
 %pom_disable_module blackbird
+%pom_disable_module spi-subtypes
 %pom_disable_module no-ctor-deser
 
 %pom_remove_plugin "org.gradlex:gradle-module-metadata-maven-plugin" jaxb
+%pom_remove_plugin "org.cyclonedx:cyclonedx-maven-plugin" jaxb
 
 %pom_remove_dep jakarta.activation:jakarta.activation-api jaxb
 
@@ -94,6 +97,10 @@ rm osgi/src/test/java/com/fasterxml/jackson/module/osgi/InjectOsgiServiceTest.ja
 %license LICENSE NOTICE
 
 %changelog
+* Wed Jul 08 2026 Red Hat PKI Team <rhcs-maint@redhat.com> - 2.21.4-1
+- Update to version 2.21.4
+- Resolves: RHEL-188291
+
 * Fri Sep 05 2025 Red Hat PKI Team <rhcs-maint@redhat.com> - 2.19.1-2
 - Remove dependency from jakarta activitaion 
 - Resolves: RHEL-113006
