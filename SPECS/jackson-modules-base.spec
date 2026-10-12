@@ -1,7 +1,7 @@
 %bcond_with     jp_minimal
 
 Name:           jackson-modules-base
-Version:        2.21.4
+Version:        2.21.6
 Release:        1%{?dist}
 Summary:        Jackson modules: Base
 License:        Apache-2.0
@@ -128,6 +128,10 @@ rm osgi/src/test/java/com/fasterxml/jackson/module/osgi/InjectOsgiServiceTest.ja
 %license LICENSE NOTICE
 
 %changelog
+* Tue Oct 06 2026 IDM PKI Team <ipa-pki-team@redhat.com> - 2.21.6-1
+- Rebase to version 2.21.6
+- Resolves: RHEL-259227
+
 * Tue Jul 07 2026 Red Hat PKI Team <rhcs-maint@redhat.com> - 2.21.4-1
 - Update to version 2.21.4
 - Resolves: RHEL-190947
