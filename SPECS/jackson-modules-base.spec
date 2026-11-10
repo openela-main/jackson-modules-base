@@ -128,9 +128,9 @@ rm osgi/src/test/java/com/fasterxml/jackson/module/osgi/InjectOsgiServiceTest.ja
 %license LICENSE NOTICE
 
 %changelog
-* Tue Oct 06 2026 IDM PKI Team <ipa-pki-team@redhat.com> - 2.21.6-1
+* Wed Sep 30 2026 IDM PKI Team <ipa-pki-team@redhat.com> - 2.21.6-1
 - Rebase to version 2.21.6
-- Resolves: RHEL-259227
+- Resolves: RHEL-259228
 
 * Tue Jul 07 2026 Red Hat PKI Team <rhcs-maint@redhat.com> - 2.21.4-1
 - Update to version 2.21.4
